@@ -64,6 +64,8 @@ GLfloat y = 0.0f;
 GLfloat z = 0.0f;
 GLfloat angleCube = 0.0f;
 
+float velocity = 0.05f;
+
 GLint r = 1;
 GLint g = 0;
 GLint b = 1;
@@ -681,17 +683,38 @@ static void insideSphere2(double x,double y,double z,double r)
    void static mothership()
    {
      unsigned int delay = floor(t/.045);
+     unsigned int delay2 = floor(t * 2);
      glTranslated(x,y,z);
      printf("Z: %f\n",z);
      glRotatef(angleSpaceship, 0, 1, 0);
      glColor3ub(r,g,b);
      spaceship();
      angleSpaceship += 0.3f; // speed of spin
-     z += 0.003f; // movement foward..need this to be modified...so I can control it.
+     z += velocity; // 0.0003f // movement foward..need this to be modified...so I can control it.
+
+     //This loops the spaceship when it goes to far away and restarts the scene.
      if(z > 10)
      {
        z = -5;
      }
+     else if(z < 4.0)
+     {
+       // calulate velocity v^2 = v_0^2 * 2a * Changein(x) // for neg accel
+       velocity += ((pow(0, 2) - pow(0.05,2)) / (2 * (4.0 - -5) ) ); // accel is .003f
+     }
+     // slows spaceship down by decrementing velocity within the z range translation.
+     //Essentially slows ship down where we want it.
+     else if(z > 4.0  && z < 4.1)
+     {
+      velocity = 0;
+      velocity += 0.0007;
+     }
+     else if(z > 4.1)
+     {
+       // calulate velocity v^2 = v_0^2 * 2a * Changein(x) // for pos accel
+       velocity += ((pow(0.05, 2) - pow(0,2)) / (2 * (10 - 4.1) ) ); // accel is .003f
+     }
+
      srand(delay);
      r = rand() % 215 + 255;
      g = 0;
