@@ -26,12 +26,12 @@ int mode=0;       //  Texture mode
 int ntex=0;       //  Cube faces
 int axes=1;       //  Display axes
 int th=0;         //  Azimuth of view angle
-int ph=0;         //  Elevation of view angle
+int ph=20;         //  Elevation of view angle
 int fov=55;       //  Field of view (for perspective)
 int light=1;      //  Lighting
 int rep=1;        //  Repitition
 double asp=1;     //  Aspect ratio
-double dim=3.0;   //  Size of world
+double dim=8.0;   //  Size of world
 // Light values
 int one       =   1;  // Unit value
 int distance  =   5;  // Light distance
@@ -45,7 +45,7 @@ int specular  =   0;  // Specular intensity (%)
 int shininess =   0;  // Shininess (power of two)
 float shiny   =   1;  // Shininess (value)
 int zh        =  90;  // Light azimuth
-float ylight  =   0;  // Elevation of light
+float ylight  =   5;  // Elevation of light
 unsigned int texture[9]; // Texture names
 unsigned int flameEye[2]; // Texture names
 unsigned int alienShip[2]; // Texture names
@@ -350,14 +350,13 @@ static void ground(double x,double y,double z,
   glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,mode?GL_REPLACE:GL_MODULATE);
 
   glBindTexture(GL_TEXTURE_2D,texture[8]); //Binds Textures to object
-
   glBegin(GL_QUADS);
   //glColor3f(0,0,0);
-  glNormal3f( 0, 0, 1);
+  glNormal3f( 0, 0, -1);
   glTexCoord2f(0, 0); glVertex3f(-10,10,0); // 0
-  glTexCoord2f(1, 0); glVertex3f(10,10,0); // 1
-  glTexCoord2f(1, 1); glVertex3f(10,-10,0); // 2
-  glTexCoord2f(0, 1); glVertex3f(-10,-10,0); // 3
+  glTexCoord2f(256, 0); glVertex3f(10,10,0); // 1
+  glTexCoord2f(256, 256); glVertex3f(10,-10,0); // 2
+  glTexCoord2f(0, 256); glVertex3f(-10,-10,0); // 3
   glEnd();
   glPopMatrix();
 }
@@ -387,10 +386,10 @@ static void road(double x,double y,double z,
 
   glBegin(GL_QUADS);
   //glColor3f(0,0,0);
-  glNormal3f( 0, 0, 1);
+  glNormal3f( 0, 0, -1);
   glTexCoord2f(0, 0); glVertex3f(-10,0,0); // 0
-  glTexCoord2f(1, 0); glVertex3f(10,0,0); // 1
-  glTexCoord2f(1, 1); glVertex3f(10,-1,0); // 2
+  glTexCoord2f(10, 0); glVertex3f(10,0,0); // 1
+  glTexCoord2f(10, 1); glVertex3f(10,-1,0); // 2
   glTexCoord2f(0, 1); glVertex3f(-10,-1,0); // 3
   glEnd();
   glPopMatrix();
@@ -750,6 +749,28 @@ static void insideSphere2(double x,double y,double z,double r)
    }
    void static mothership()
    {
+     //  Translate intensity to color vectors
+     float exponent[] = {1.5f};
+     float lightangle[] = {90};
+     float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
+     float Diffuse[]   = {0.1*diffuse ,0.1*diffuse ,0.01*diffuse ,1.0};
+     float Specular[]  = {0.1*specular,0.1*specular,0.01*specular,1.0};
+     float directionSpotlight[]  = {0,-1,0};
+     //  Light direction
+     //float Position[]  = {5*Cos(zh),ylight,5*Sin(zh),1}; // movement of ball and light
+     float Position[]  = {x,y,z,1}; // movement of ball and light
+     //  OpenGL should normalize normal vectors
+     //  Enable light 0
+     glEnable(GL_LIGHT1); // enables the first light
+     //  Set ambient, diffuse, specular components and position of light 0
+     glLightfv(GL_LIGHT1,GL_AMBIENT ,Ambient);
+     glLightfv(GL_LIGHT1,GL_DIFFUSE ,Diffuse);
+     glLightfv(GL_LIGHT1,GL_SPECULAR,Specular);
+     glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,directionSpotlight);
+     glLightfv(GL_LIGHT1,GL_SPOT_EXPONENT,exponent);
+          glLightfv(GL_LIGHT1,GL_SPOT_CUTOFF,lightangle);
+     glLightfv(GL_LIGHT1,GL_POSITION,Position); // moves the light source
+
      unsigned int delay = floor(t/.045);
      unsigned int delay2 = floor(t * 2);
      glTranslated(x,y,z);
@@ -826,10 +847,11 @@ void display()
       float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.01*diffuse ,1.0};
       float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
       //  Light direction
-      float Position[]  = {5*Cos(zh),ylight,5*Sin(zh),1};
+      //float Position[]  = {5*Cos(zh),ylight,5*Sin(zh),1}; // movement of ball and light
+      float Position[]  = {5*Cos(zh),5*Sin(zh),ylight,1}; // movement of ball and light
       //  Draw light position as ball (still no lighting here)
       glColor3f(1,1,1);
-      ball(Position[0],Position[1],Position[2] , 0.1);
+      ball(Position[0],Position[1],Position[2] , 0.1); // sets ball position
       //  OpenGL should normalize normal vectors
       glEnable(GL_NORMALIZE);
       //  Enable lighting
@@ -838,12 +860,12 @@ void display()
       glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
       glEnable(GL_COLOR_MATERIAL);
       //  Enable light 0
-      glEnable(GL_LIGHT0);
-      //  Set ambient, diffuse, specular components and position of light 0
-      glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
-      glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
-      glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
-      glLightfv(GL_LIGHT0,GL_POSITION,Position);
+      // glEnable(GL_LIGHT0); // enables the first light
+      // //  Set ambient, diffuse, specular components and position of light 0
+      // glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
+      // glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
+      // glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+      // glLightfv(GL_LIGHT0,GL_POSITION,Position); // moves the light source
    }
    else
       glDisable(GL_LIGHTING);
@@ -862,12 +884,6 @@ void display()
    glPushMatrix();
    glTranslated(0,0,0);
    house(0, .5, 0, 45);
-   glPopMatrix();
-
-   //house 4
-   glPushMatrix();
-   glTranslated(0,0,-1);
-   house(0, .5, 0, 90);
    glPopMatrix();
 
    //house2
@@ -892,6 +908,14 @@ void display()
    glPushMatrix();
    glTranslated(-.5,.3,0);
    tallHouse(1, .48, 0, 45);
+   glPopMatrix();
+
+   // 180 houses
+   //house 4 rotated 180
+   glPushMatrix();
+   glTranslated(0,0,-1);
+   glRotated(180,0,1,0);
+   house(0, .5, 0, 45);
    glPopMatrix();
 
 
@@ -1100,7 +1124,7 @@ int main(int argc,char* argv[])
    glutInit(&argc,argv);
    //  Request double buffered, true color window with Z buffering at 600x600
    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-   glutInitWindowSize(600,600);
+   glutInitWindowSize(2560,1440);
    glutCreateWindow("finalProject");
    //  Set callbacks
    glutDisplayFunc(display);
