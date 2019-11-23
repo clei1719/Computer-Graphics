@@ -352,11 +352,11 @@ static void ground(double x,double y,double z,
   glBindTexture(GL_TEXTURE_2D,texture[8]); //Binds Textures to object
   glBegin(GL_QUADS);
   //glColor3f(0,0,0);
-  glNormal3f( 0, 0, -1);
+  glNormal3f( 1, 0, 0);
   glTexCoord2f(0, 0); glVertex3f(-10,10,0); // 0
-  glTexCoord2f(256, 0); glVertex3f(10,10,0); // 1
-  glTexCoord2f(256, 256); glVertex3f(10,-10,0); // 2
-  glTexCoord2f(0, 256); glVertex3f(-10,-10,0); // 3
+  glTexCoord2f(50, 0); glVertex3f(10,10,0); // 1
+  glTexCoord2f(50, 50); glVertex3f(10,-10,0); // 2
+  glTexCoord2f(0, 50); glVertex3f(-10,-10,0); // 3
   glEnd();
   glPopMatrix();
 }
@@ -386,7 +386,7 @@ static void road(double x,double y,double z,
 
   glBegin(GL_QUADS);
   //glColor3f(0,0,0);
-  glNormal3f( 0, 0, -1);
+  glNormal3f( 1, 0, 0);
   glTexCoord2f(0, 0); glVertex3f(-10,0,0); // 0
   glTexCoord2f(10, 0); glVertex3f(10,0,0); // 1
   glTexCoord2f(10, 1); glVertex3f(10,-1,0); // 2
@@ -750,10 +750,10 @@ static void insideSphere2(double x,double y,double z,double r)
    void static mothership()
    {
      //  Translate intensity to color vectors
-     float exponent[] = {1.5f};
+     float exponent[] = {.89f};
      float lightangle[] = {90};
      float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
-     float Diffuse[]   = {0.1*diffuse ,0.1*diffuse ,0.01*diffuse ,1.0};
+     float Diffuse[]   = {0.1*diffuse ,0.1*diffuse ,0.1*diffuse ,1.0};
      float Specular[]  = {0.1*specular,0.1*specular,0.01*specular,1.0};
      float directionSpotlight[]  = {0,-1,0};
      //  Light direction
@@ -766,9 +766,9 @@ static void insideSphere2(double x,double y,double z,double r)
      glLightfv(GL_LIGHT1,GL_AMBIENT ,Ambient);
      glLightfv(GL_LIGHT1,GL_DIFFUSE ,Diffuse);
      glLightfv(GL_LIGHT1,GL_SPECULAR,Specular);
-     glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,directionSpotlight);
-     glLightfv(GL_LIGHT1,GL_SPOT_EXPONENT,exponent);
-          glLightfv(GL_LIGHT1,GL_SPOT_CUTOFF,lightangle);
+     glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,directionSpotlight); // direction of light
+     glLightfv(GL_LIGHT1,GL_SPOT_EXPONENT,exponent); // amount of light
+     glLightfv(GL_LIGHT1,GL_SPOT_CUTOFF,lightangle); // angle of light
      glLightfv(GL_LIGHT1,GL_POSITION,Position); // moves the light source
 
      unsigned int delay = floor(t/.045);
@@ -1017,10 +1017,28 @@ void idle()
        th -= 5;
     //  Up arrow key - increase elevation by 5 degrees
     else if (key == GLUT_KEY_UP)
-       ph += 5;
+    {
+      if(ph >= 175) // locks the view to only allow looking at whats on the landscape, not below it.
+      {
+        ph = 175;
+      }
+      else
+      {
+        ph += 5;
+      }
+    }
     //  Down arrow key - decrease elevation by 5 degrees
     else if (key == GLUT_KEY_DOWN)
-       ph -= 5;
+    {
+      if(ph <= 5) // locks the view to only allow looking at whats on the landscape, not below it.
+      {
+        ph = 5;
+      }
+      else
+      {
+        ph -= 5;
+      }
+    }
     //  PageUp key - increase dim
     else if (key == GLUT_KEY_PAGE_DOWN)
        dim += 0.1;
