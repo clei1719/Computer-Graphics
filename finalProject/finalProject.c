@@ -259,6 +259,85 @@ static void cube2(double x,double y,double z,
    glPopMatrix();
    glDisable(GL_TEXTURE_2D);
 }
+static void cube3(double x,double y,double z,
+                 double dx,double dy,double dz,
+                 double th)
+{
+   //  Set specular color to white
+   float white[] = {1,1,1,1};
+   float Emission[]  = {0.0,0.0,0.01*emission,1.0};
+   glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+   glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Emission);
+   //  Save transformation
+   glPushMatrix();
+   //  Offset, scale and rotate
+   glTranslated(x,y,z);
+   glRotated(th,0,1,0);
+   glScaled(dx,dy,dz);
+   //  Enable textures
+   glEnable(GL_TEXTURE_2D);
+   glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,mode?GL_REPLACE:GL_MODULATE);
+   glColor3f(1,1,1);
+   glBindTexture(GL_TEXTURE_2D,alienShip[1]);
+   //  Front
+   //glColor3f(1,0,0);
+   glBegin(GL_QUADS);
+   glNormal3f( 0, 0, 1);
+   glTexCoord2f(0,0); glVertex3f(-1,-1, 1);
+   glTexCoord2f(1,0); glVertex3f(+1,-1, 1);
+   glTexCoord2f(1,1); glVertex3f(+1,+1, 1);
+   glTexCoord2f(0,1); glVertex3f(-1,+1, 1);
+   glEnd();
+   //  Back
+   //glColor3f(0,0,1);
+   glBegin(GL_QUADS);
+   glNormal3f( 0, 0,-1);
+   glTexCoord2f(0,0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(1,0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(1,1); glVertex3f(-1,+1,-1);
+   glTexCoord2f(0,1); glVertex3f(+1,+1,-1);
+   glEnd();
+   //  Right
+   //glColor3f(1,1,0);
+   glBegin(GL_QUADS);
+   glNormal3f(+1, 0, 0);
+   glTexCoord2f(0,0); glVertex3f(+1,-1,+1);
+   glTexCoord2f(1,0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(1,1); glVertex3f(+1,+1,-1);
+   glTexCoord2f(0,1); glVertex3f(+1,+1,+1);
+   glEnd();
+   //  Left
+   //glColor3f(0,1,0);
+   glBegin(GL_QUADS);
+   glNormal3f(-1, 0, 0);
+   glTexCoord2f(0,0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(1,0); glVertex3f(-1,-1,+1);
+   glTexCoord2f(1,1); glVertex3f(-1,+1,+1);
+   glTexCoord2f(0,1); glVertex3f(-1,+1,-1);
+   glEnd();
+   //  Top
+   //glColor3f(0,1,1);
+   glBegin(GL_QUADS);
+   glNormal3f( 0,+1, 0);
+   glTexCoord2f(0,0); glVertex3f(-1,+1,+1);
+   glTexCoord2f(1,0); glVertex3f(+1,+1,+1);
+   glTexCoord2f(1,1); glVertex3f(+1,+1,-1);
+   glTexCoord2f(0,1); glVertex3f(-1,+1,-1);
+   glEnd();
+   //  Bottom
+   //glColor3f(1,0,1);
+   glBegin(GL_QUADS);
+   glNormal3f( 0,-1, 0);
+   glTexCoord2f(0,0); glVertex3f(-1,-1,-1);
+   glTexCoord2f(1,0); glVertex3f(+1,-1,-1);
+   glTexCoord2f(1,1); glVertex3f(+1,-1,+1);
+   glTexCoord2f(0,1); glVertex3f(-1,-1,+1);
+   glEnd();
+   //  Undo transformations and textures
+   glPopMatrix();
+   glDisable(GL_TEXTURE_2D);
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void pyramid(double x,double y,double z,
                  double dx,double dy,double dz,
@@ -327,6 +406,43 @@ static void pyramid(double x,double y,double z,
    glPopMatrix();
    glDisable(GL_TEXTURE_2D);
 }
+static void stairs(double x,double y,double z)
+{
+  float scaler = .3;
+  float flatten = .02;
+  glPushMatrix();
+  glScaled(.1,flatten,scaler);
+  cube3(.8,80,0, 1,1,2 ,0);
+  glPopMatrix();
+
+  glPushMatrix();
+  glScaled(flatten,.1,scaler);
+  cube3(-2,15.2,0, 1,1,2 ,0);
+  glPopMatrix();
+
+  glPushMatrix();
+  glScaled(.15,flatten,scaler);
+  cube3(-1.15,71,0, 1,1,2 ,0);
+  glPopMatrix();
+
+  glPushMatrix();
+  glScaled(flatten,.1,scaler);
+  cube3(-15.3,13.2,0, 1,1,2 ,0);
+  glPopMatrix();
+}
+static void stairCase(double x,double y,double z)
+{
+  glPushMatrix();
+  glTranslated(0,0,0);
+  stairs(0,0,0);
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslated(-.46,-.4,0);
+  stairs(0,0,0);
+  glPopMatrix();
+}
+
 static void ground(double x,double y,double z,
                  double dx,double dy,double dz,
                  double th)
@@ -693,6 +809,77 @@ static void insideSphere2(double x,double y,double z,double r)
    //  Undo transformations
    glPopMatrix();
 }
+void draw_cylinder(GLfloat radius,
+                   GLfloat height,
+                   GLubyte R,
+                   GLubyte G,
+                   GLubyte B)
+{
+    GLfloat x              = 0.0;
+    GLfloat y              = 0.0;
+    GLfloat angle          = 0.0;
+    GLfloat angle_stepsize = 0.1;
+
+    /** Draw the tube */
+    glColor3ub(R-40,G-40,B-40);
+    glBegin(GL_QUAD_STRIP);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,mode?GL_REPLACE:GL_MODULATE);
+    glColor3f(1,1,1);
+    glBindTexture(GL_TEXTURE_2D,alienShip[1]);
+    angle = 0.0;
+        while( angle < 2*3.14 ) {
+            x = radius * cos(angle);
+            y = radius * sin(angle);
+            glVertex3f(x, y , height);
+            glVertex3f(x, y , 0.0);
+            angle = angle + angle_stepsize;
+        }
+        glVertex3f(radius, 0.0, height);
+
+        glVertex3f(radius, 0.0, 0.0);
+    glEnd();
+
+    /** Draw the circle on top of cylinder */
+    //glColor3ub(R,G,B);
+    glBegin(GL_POLYGON);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,mode?GL_REPLACE:GL_MODULATE);
+    glColor3f(1,1,1);
+    glBindTexture(GL_TEXTURE_2D,alienShip[1]);
+    angle = 0.0;
+        while( angle < 2*3.14) {
+            x = radius * cos(angle);
+            y = radius * sin(angle);
+            glVertex3f(x, y , height);
+            angle = angle + angle_stepsize;
+        }
+        glVertex3f(radius, 0.0, height);
+    glEnd();
+}
+void drawHalfSphere(int scaley, int scalex, GLfloat r) {
+  int i, j;
+  GLfloat v[scalex*scaley][3];
+
+  for (i=0; i<scalex; ++i) {
+    for (j=0; j<scaley; ++j) {
+      v[i*scaley+j][0]=r*cos(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
+      v[i*scaley+j][1]=r*sin(i*M_PI/(2*scalex));
+      v[i*scaley+j][2]=r*sin(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
+    }
+  }
+
+  glBegin(GL_QUADS);
+    for (i=0; i<scalex-1; ++i) {
+      for (j=0; j<scaley; ++j) {
+        glVertex3fv(v[i*scaley+j]);
+        glVertex3fv(v[i*scaley+(j+1)%scaley]);
+        glVertex3fv(v[(i+1)*scaley+(j+1)%scaley]);
+        glVertex3fv(v[(i+1)*scaley+j]);
+      }
+    }
+  glEnd();
+}
  static void eyeOfSoloman()
  {
    //Moon or Sun
@@ -747,6 +934,38 @@ static void insideSphere2(double x,double y,double z,double r)
 
      glPopMatrix();
    }
+   static void landingGear(double x,double y,double z,
+                    double dx,double dy,double dz,
+                    double th)
+   {
+     //cylinders
+     glPushMatrix();
+     glTranslated(0,1.1,2.7);
+     glRotated(45,1,0,0);
+     draw_cylinder(0.1, 1.0, 255, 160, 100);
+     glPopMatrix();
+
+     glPushMatrix();
+     glTranslated(0,.35,0);
+     glRotated(-45,1,0,0);
+     draw_cylinder(0.1, 1.0, 255, 160, 100);
+     glPopMatrix();
+
+     glPushMatrix();
+     glTranslated(.8,1,1.85);
+     glRotated(90,0,1,0);
+     glRotated(45,1,0,0);
+     draw_cylinder(0.1, 1.0, 255, 160, 100);
+     glPopMatrix();
+
+     glPushMatrix();
+     glTranslated(-1.5,.3,1.85);
+     glRotated(90,0,1,0);
+     glRotated(-45,1,0,0);
+     draw_cylinder(0.1, 1.0, 255, 160, 100);
+     glPopMatrix();
+   }
+
    void static mothership()
    {
      //  Translate intensity to color vectors
@@ -775,9 +994,57 @@ static void insideSphere2(double x,double y,double z,double r)
      unsigned int delay2 = floor(t * 2);
      glTranslated(x,y,z);
      printf("Z: %f\n",z);
+     //printf("X: %f\n",x);
+     printf("Y: %f\n",y);
+     printf("DELAY: %f\n",delay);
+     printf("angleSpaceship: %f\n",angleSpaceship);
      glRotatef(angleSpaceship, 0, 1, 0);
      glColor3ub(r,g,b);
      spaceship();
+
+     glPushMatrix();
+     glTranslated(0,.36,0);
+     glRotated(-45,0,1,0);
+     glScaled(.1,.3,.1);
+     stairCase(0,0,0);
+     glPopMatrix();
+
+     glPushMatrix();
+     glTranslated(.16,.6,-.2);
+     glScaled(.2,.2,.2);
+     landingGear(1,1,1, 1,1,1,  0);
+     glPopMatrix();
+     //bubble
+     // glPushMatrix();
+     // glTranslated(.16,.6,-.2);
+     // drawHalfSphere(24, 24, .5);
+     // glPopMatrix();
+
+     //feet
+     glPushMatrix();
+     glTranslated(.16,.65,-.2);
+     glScaled(.5,1,1);
+     drawHalfSphere(24, 20, .05);
+     glPopMatrix();
+
+     glPushMatrix();
+     glTranslated(.16,.65,.49);
+     glScaled(.5,1,1);
+     drawHalfSphere(24, 20, .05);
+     glPopMatrix();
+
+     glPushMatrix();
+     glTranslated(.45,.65,.17);
+     glScaled(1,1,.5);
+     drawHalfSphere(24, 20, .05);
+     glPopMatrix();
+
+     glPushMatrix();
+     glTranslated(-.12,.65,.17);
+     glScaled(1,1,.5);
+     drawHalfSphere(24, 20, .05);
+     glPopMatrix();
+
      angleSpaceship += 1.6f; // speed of spin
      z += velocity; // 0.0003f // movement foward..need this to be modified...so I can control it.
 
@@ -793,12 +1060,40 @@ static void insideSphere2(double x,double y,double z,double r)
      }
      // slows spaceship down by decrementing velocity within the z range translation.
      //Essentially slows ship down where we want it.
-     else if(z > 4.0  && z < 4.1)
+     else if(z > 4.7  && z < 4.8)
      {
       velocity = 0;
-      velocity += 0.0007;
+      //then we want to land
+      y -= .002;
+
+      angleSpaceship -= 1.6f;//when we come to the stopping point, we want to stop spinning.
+
+      //spaceship decend
+      if(y < -1.15)
+      {
+        y = -1.15;
+      }
+      // landing gear drawing and landing stairs
+
+
+
+      //some sort of delay....
+
+
+      //then we take off again
+      // y += .002;
+      // if(y >= 2)
+      // {
+      //   y = 2;
+      // }
+
+
+      //then we take off again
+
+      //then we engage and off we go into space!!
+      //velocity += 0.0007;
      }
-     else if(z > 4.1)
+     else if(z > 4.8)
      {
        // calulate velocity v^2 = v_0^2 * 2a * Changein(x) // for pos accel
        velocity += ((pow(0.05, 2) - pow(0,2)) / (2 * (10 - 4.1) ) ); // accel is .003f
@@ -859,13 +1154,15 @@ void display()
       //  glColor sets ambient and diffuse color materials
       glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
       glEnable(GL_COLOR_MATERIAL);
-      //  Enable light 0
-      // glEnable(GL_LIGHT0); // enables the first light
-      // //  Set ambient, diffuse, specular components and position of light 0
-      // glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
-      // glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
-      // glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
-      // glLightfv(GL_LIGHT0,GL_POSITION,Position); // moves the light source
+       //Enable light 0
+
+
+      glEnable(GL_LIGHT0); // enables the first light
+      //  Set ambient, diffuse, specular components and position of light 0
+      glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
+      glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
+      glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+      glLightfv(GL_LIGHT0,GL_POSITION,Position); // moves the light source
    }
    else
       glDisable(GL_LIGHTING);
@@ -945,11 +1242,6 @@ void display()
    //glColor3f(Cos(th)*Cos(th) , Sin(ph)*Sin(ph) , Sin(th)*Sin(th));
    mothership();//(x, y, z, height, width, depth);
    glPopMatrix();
-
-
-
-
-
 
 
 
